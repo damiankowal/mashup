@@ -20,16 +20,11 @@ $( function() {
     }
     //iterate through the JSON result object.
     app.searchResultsHandler = function( searchResults ) {
-        for ( var key in searchResults ) {
-            console.log( key );
-            var results = searchResults[ key ];
-            for ( var i = 0; i < results.length; i += 1 ) {
-                var result = results[ i ];
-                for ( var key in result ) {
-                    console.log( result[ key ] );
-                }
-            }
-        }
+        var template = _.template( $( '#resultsTemplate' ).html() )
+
+        $( '#results' ).append( template({
+            list: searchResults.results
+        }));
     }
 
     app.getResults( 10011 );
