@@ -1,32 +1,46 @@
 var app = app || {};
 
 $( function() {
-    // Source: USDA National Farmers Market Directory API
-    // http://search.ams.usda.gov/farmersmarkets/v1/svcdesc.html
-    app.getResults = function( zip ) {
-        console.log( 'getResults called' );
-        // or
-        // function getResults(lat, lng) {
+    var $results = $( '#results' );
+
+    app.marketTemplate = _.template( $( '#marketTemplate' ).html() );
+
+    app.getZip = function() {
+        return '10011';
+    }
+    app.getMarkets = function( zip ) {
+        // Source: USDA National Farmers Market Directory API
+        // http://search.ams.usda.gov/farmersmarkets/v1/svcdesc.html
         $.ajax({
             type: "GET",
             contentType: "application/json; charset=utf-8",
-            // submit a get request to the restful service zipSearch or locSearch.
             url: "http://search.ams.usda.gov/farmersmarkets/v1/data.svc/zipSearch?zip=" + zip,
-            // or
-            // url: "http://search.ams.usda.gov/farmersmarkets/v1/data.svc/locSearch?lat=" + lat + "&lng=" + lng,
             dataType: 'jsonp',
-            jsonpCallback: 'app.searchResultsHandler'
+            jsonpCallback: 'app.markethResultsHandler'
         });
-    }
-    //iterate through the JSON result object.
-    app.searchResultsHandler = function( searchResults ) {
-        var template = _.template( $( '#resultsTemplate' ).html() )
+    };
 
-        $( '#results' ).append( template({
-            list: searchResults.results
+    app.marketResultsHandler = function( searchResults ) {
+        return searchResults.results;
+    };
+
+    app.renderMarkets = function( results ) {
+        $results.append( app.marketTemplate({
+            list: results
         }));
-    }
+    };
 
-    app.getResults( 10011 );
+    app.init = function() {
+        var zip = app.getZip(),
+            markets = app.getMarkets( zip );
+
+        app.renderMarkets( markets );
+    };
+
+
+
+
+
+    app.init();
 
 });
