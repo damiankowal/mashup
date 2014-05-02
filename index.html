@@ -9,11 +9,7 @@
     <div id="results"></div>
 
     <script id="marketTemplate" type="text/template">
-        <ul>
-        <% _( list ).each( function( item ) { %>
-            <li><%= item.id %> : <%= item.marketname %></li>
-        <% }); %>
-        </ul>
+      <p><%= market.id %> : <%= market.name %>, <%= market.distance %></p>
     </script>
     <script src="js/lib/jquery.min.js"></script>
     <script src="js/lib/underscore-min.js"></script>
