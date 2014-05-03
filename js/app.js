@@ -15,6 +15,7 @@ $( function() {
     };
 
     app.marketTemplate = _.template( $( '#marketTemplate' ).html() );
+    app.headerTemplate = _.template( $( '#headerTemplate' ).html() );
 
     app.models.Market = function( data ) {
         this.id = data.id;
@@ -34,7 +35,7 @@ $( function() {
     };
 
     app.getZip = function() {
-        return '10011';
+        return '10018';
     };
 
     app.getMarkets = function( zip ) {
@@ -79,9 +80,17 @@ $( function() {
         return $.when.apply( $, detailsPromises )
     };
 
+    app.renderHeader = function( zip ) {
+        $results.append( app.headerTemplate({
+            zip: zip
+        }));
+    };
+
     app.init = function() {
         var dataPromise,
             zip = app.getZip();
+
+        app.renderHeader( zip );
 
         dataPromise = app.getMarkets( zip )
         .then( app.collectMarketDetails );

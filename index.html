@@ -8,6 +8,10 @@
   <body>
     <div id="results"></div>
 
+    <script id="headerTemplate" type="text/template">
+      <h1>Farmers markets near zipcode <%= zip %></h1>
+    </script>
+
     <script id="marketTemplate" type="text/template">
       <div class="market-info">
       <h2><%= market.name %></h2>
