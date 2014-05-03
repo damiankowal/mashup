@@ -25,14 +25,13 @@ $( function() {
         });
     };
 
-    app.collections.Markets = function( markets ) {
-        this.items = markets;
-    };
-
-    app.collections.Markets.prototype.render = function() {
-        _.each( this.items, function( item ) {
-            $results.append( item.render() );
-        });
+    app.collections.markets = {
+        items: [],
+        render: function() {
+            _.each( this.items, function( item ) {
+                $results.append( item.render() );
+            });
+        }
     };
 
     app.getZip = function() {
@@ -59,25 +58,25 @@ $( function() {
         });
     };
 
-    app.buildMarketCollection = function( data ) {
-        var collection = [];
-        _.each( data.results, function( result ) {
+    app.addMarketDetails = function( data ) {
+        var detailedResults = $.extend( {}, data.results );
+        _.each( detailedResults, function( result ) {
             console.log( '_.each called for ' + result.marketname );
             var details = app.getMarketDetails( result.id );
             details.then( function( data ) {
-                result.marketdetails = data.marketdetails;
-                collection.push( new app.models.Market( result ) );
+                result.marketdetails = $.extend( {}, data.marketdetails );
+                // collection.push( new app.models.Market( result ) );
             });
         });
-        console.log( 'collection: ' + collection );
-        return $.when.apply( $, collection );
+        console.log( 'detailedResutls: ' + detailedResults );
+        return $.when.apply( $, detailedResults );
     };
 
     app.init = function() {
         var zip = app.getZip();
 
         app.getMarkets( zip )
-        .then( app.buildMarketCollection )
+        .then( app.addMarketDetails )
         // .then( function( marketList ) {
             // app.collections.markets = new app.collections.Markets( marketList );
         // })
