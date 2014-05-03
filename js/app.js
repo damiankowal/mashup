@@ -25,7 +25,6 @@ $( function() {
         this.address = data.marketdetails.Address;
         this.schedule = data.marketdetails.Schedule;
         this.products = data.marketdetails.Products;
-        console.log( 'instantiaing ' + this.name );
     };
 
     app.models.Market.prototype.render = function() {
@@ -64,6 +63,9 @@ $( function() {
             results = data.results;
 
         function extendResult( result, data ) {
+            // Return a function which will add market details to a
+            // result object, capturing the result object in a closure
+            // so it is avaiable when the function is called by .then
             return function ( data ) {
                 var details = $.extend( {}, data.marketdetails );
                 result.marketdetails = details;
@@ -74,10 +76,10 @@ $( function() {
         for ( var i = 0, l = results.length; i < l; i += 1 ) {
             result = $.extend( {}, results[ i ] );
             detailsPromises[ i ] = app.getMarketDetails( result.id )
-            .then( extendResult( result, data ) );
+                .then( extendResult( result, data ) );
         }
         
-        return $.when.apply( $, detailsPromises )
+        return $.when.apply( $, detailsPromises );
     };
 
     app.renderHeader = function( zip ) {
@@ -93,10 +95,9 @@ $( function() {
         app.renderHeader( zip );
 
         dataPromise = app.getMarkets( zip )
-        .then( app.collectMarketDetails );
+            .then( app.collectMarketDetails );
         
         $.when( dataPromise ).done( function() {
-            console.log ( 'when called');
             app.markets.render();
         });
     };
