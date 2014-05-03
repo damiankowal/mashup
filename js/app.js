@@ -1,21 +1,18 @@
 var app = app || {};
 
 $( function() {
-    var $results = $( '#results' );
+    app.$el = $( '#results' );
+
+    app.markets = {
+        items: []
+    };
 
     app.models = {};
 
-    app.markets = {
-        items: [],
-        render: function() {
-            _.each( this.items, function( item ) {
-                $results.append( item.render() );
-            });
-        }
+    app.templates = {
+        header: _.template( $( '#headerTemplate' ).html() ),
+        market: _.template( $( '#marketTemplate' ).html() )
     };
-
-    app.marketTemplate = _.template( $( '#marketTemplate' ).html() );
-    app.headerTemplate = _.template( $( '#headerTemplate' ).html() );
 
     app.models.Market = function( data ) {
         this.id = data.id;
@@ -28,9 +25,21 @@ $( function() {
     };
 
     app.models.Market.prototype.render = function() {
-        return app.marketTemplate({
+        return app.templates.market({
             market: this
         });
+    };
+
+    app.markets.render = function() {
+        _.each( this.items, function( item ) {
+            app.$el.append( item.render() );
+        });
+    };
+
+    app.renderHeader = function( zip ) {
+        app.$el.append( app.templates.header({
+            zip: zip
+        }));
     };
 
     app.getZip = function() {
@@ -80,12 +89,6 @@ $( function() {
         }
         
         return $.when.apply( $, detailsPromises );
-    };
-
-    app.renderHeader = function( zip ) {
-        $results.append( app.headerTemplate({
-            zip: zip
-        }));
     };
 
     app.init = function() {
