@@ -9,10 +9,14 @@ $( function() {
     app.marketTemplate = _.template( $( '#marketTemplate' ).html() );
 
     app.models.Market = function( data ) {
-        // format: {"id":"1002192", "marketname":"1.7 Ballston FRESHFARM Market"}
         this.id = data.id;
         this.distance = data.marketname.substr( 0, data.marketname.indexOf( ' ' ) );
         this.name = data.marketname.substr( data.marketname.indexOf( ' ' ) + 1 );
+        this.googleLink = data.marketdetails.GoogleLink;
+        this.address = data.marketdetails.Address;
+        this.schedule = data.marketdetails.Schedule;
+        this.products = data.marketdetails.Products;
+        console.log( 'instantiaing ' + this.name );
     };
 
     app.models.Market.prototype.render = function() {
@@ -46,12 +50,27 @@ $( function() {
         });
     };
 
+    app.getMarketDetails = function( id ) {
+        return $.ajax({
+            type: "GET",
+            contentType: "application/json; charset=utf-8",
+            url: "http://search.ams.usda.gov/farmersmarkets/v1/data.svc/mktDetail?id=" + id,
+            dataType: 'jsonp',
+        });
+    };
+
     app.buildMarketCollection = function( data ) {
         var collection = [];
         _.each( data.results, function( result ) {
-            collection.push( new app.models.Market( result ) );
+            console.log( '_.each called for ' + result.marketname );
+            var details = app.getMarketDetails( result.id );
+            details.then( function( data ) {
+                result.marketdetails = data.marketdetails;
+                collection.push( new app.models.Market( result ) );
+            });
         });
-        return collection;
+        console.log( 'collection: ' + collection );
+        return $.when.apply( $, collection );
     };
 
     app.init = function() {
@@ -59,11 +78,12 @@ $( function() {
 
         app.getMarkets( zip )
         .then( app.buildMarketCollection )
-        .then( function( marketList ) {
-            app.collections.markets = new app.collections.Markets( marketList );
-        })
+        // .then( function( marketList ) {
+            // app.collections.markets = new app.collections.Markets( marketList );
+        // })
         .then( function() {
-            app.collections.markets.render();
+            console.log( 'calling render' );
+            // app.collections.markets.render();
         });
     };
 
