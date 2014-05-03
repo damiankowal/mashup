@@ -47,28 +47,37 @@ $( function() {
         });
     };
 
-    app.getMarketDetails = function( data ) {
-        console.log( 'getMarketDetails called for ' + data.marketname );
+    app.getMarketDetails = function( id ) {
         return $.ajax({
             type: "GET",
             contentType: "application/json; charset=utf-8",
-            url: "http://search.ams.usda.gov/farmersmarkets/v1/data.svc/mktDetail?id=" + data.id,
+            url: "http://search.ams.usda.gov/farmersmarkets/v1/data.svc/mktDetail?id=" + id,
             dataType: 'jsonp',
         });
     };
 
-    app.addMarketDetails = function( data ) {
-        var detailsPromises = [];
-        var results = data.results;
+    app.collectMarketDetails = function( data ) {
+        var detailsPromises = [],
+            results = data.results;
+
         for ( var i = 0, l = results.length; i < l; i += 1 ) {
-            detailsPromises.push(
-                app.getMarketDetails( results[ i ] )
+            detailsPromises[ i ] = app.getMarketDetails( results[ i ].id )
+            .then( function( data ) {
+                console.log( data );
+            });
+        }
+
+        
+        return $.when.apply( $, detailsPromises )//.done( function() {
+           //console.log( detailsPromises );
+        //});
+    
+        /*
                 .then( function( data ) {
                     results[ i ].marketdetails = $.extend( {}, data.marketdetails );
                 })
             );
         }
-        /*
         _.each( data.results, function( result ) {
             console.log( '_.each called for ' + result.marketname );
             app.getMarketDetails( result )
@@ -79,31 +88,28 @@ $( function() {
             });
         });
         */
-        $.when.apply( $, detailsPromises );
+ 
     };
 
-    app.instantiateMarketModels = function ( data ) {
-        var items = [];
-        console.log( data );
-        _.each( data, function( market ) {
-            console.log( 'a' );
-            items.push( new app.models.Market( market ) );
-        });
-        console.log( items );
-        return items;
-    }
+
 
     app.init = function() {
+        var dataPromise;
         var zip = app.getZip();
 
-        app.getMarkets( zip )
-        .then( app.addMarketDetails )
-        .then( app.instantiateMarketModels )
+        dataPromise = app.getMarkets( zip )
+        .then( app.collectMarketDetails );
+        //.then( app.addMarketDetails )
+        //.then( app.instantiateMarketModels )
         // .then( function( marketList ) {
             // app.collections.markets = new app.collections.Markets( marketList );
         // })
-        .then( function() {
-            console.log( 'calling render' );
+        $.when( dataPromise ).done( function( data ) {
+            console.log ( 'when called' + data )
+            _.each( data, function( item ) {
+                console.log( item.responseJSON );
+            })
+            console.log( 'calling render ' );
             // app.collections.markets.render();
         });
     };
