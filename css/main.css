@@ -1,1 +1,14 @@
 /* Styles for Mashup app */
+body {
+    background-color: #f0f0f0;
+    line-height: 1.5;
+}
+#results {
+    max-width: 45em;
+    margin: 0 auto;
+}
+.market-info {
+    background-color: #fff;
+    padding: 1em;
+    margin: 2em 0;
+}

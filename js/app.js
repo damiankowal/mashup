@@ -2,6 +2,9 @@ var app = app || {};
 
 $( function() {
     var $results = $( '#results' );
+
+    app.models = {};
+
     app.markets = {
         items: [],
         render: function() {
@@ -10,8 +13,6 @@ $( function() {
             });
         }
     };
-    app.models = {};
-    app.views = {};
 
     app.marketTemplate = _.template( $( '#marketTemplate' ).html() );
 
@@ -58,59 +59,36 @@ $( function() {
 
     app.collectMarketDetails = function( data ) {
         var detailsPromises = [],
+            result,
             results = data.results;
 
-        for ( var i = 0, l = results.length; i < l; i += 1 ) {
-            detailsPromises[ i ] = app.getMarketDetails( results[ i ].id )
-            .then( function( data ) {
-                console.log( data );
-            });
+        function extendResult( result, data ) {
+            return function ( data ) {
+                var details = $.extend( {}, data.marketdetails );
+                result.marketdetails = details;
+                app.markets.items.push( new app.models.Market( result ) );
+            }
         }
 
-        
-        return $.when.apply( $, detailsPromises )//.done( function() {
-           //console.log( detailsPromises );
-        //});
-    
-        /*
-                .then( function( data ) {
-                    results[ i ].marketdetails = $.extend( {}, data.marketdetails );
-                })
-            );
+        for ( var i = 0, l = results.length; i < l; i += 1 ) {
+            result = $.extend( {}, results[ i ] );
+            detailsPromises[ i ] = app.getMarketDetails( result.id )
+            .then( extendResult( result, data ) );
         }
-        _.each( data.results, function( result ) {
-            console.log( '_.each called for ' + result.marketname );
-            app.getMarketDetails( result )
-            .then( function( data ) {
-                console.log( 'details.then called, ' + result.marketname );
-                result.marketdetails = $.extend( {}, data.marketdetails );
-                //detailedResults.push( new app.models.Market( result ) );
-            });
-        });
-        */
- 
+        
+        return $.when.apply( $, detailsPromises )
     };
 
-
-
     app.init = function() {
-        var dataPromise;
-        var zip = app.getZip();
+        var dataPromise,
+            zip = app.getZip();
 
         dataPromise = app.getMarkets( zip )
         .then( app.collectMarketDetails );
-        //.then( app.addMarketDetails )
-        //.then( app.instantiateMarketModels )
-        // .then( function( marketList ) {
-            // app.collections.markets = new app.collections.Markets( marketList );
-        // })
-        $.when( dataPromise ).done( function( data ) {
-            console.log ( 'when called' + data )
-            _.each( data, function( item ) {
-                console.log( item.responseJSON );
-            })
-            console.log( 'calling render ' );
-            // app.collections.markets.render();
+        
+        $.when( dataPromise ).done( function() {
+            console.log ( 'when called');
+            app.markets.render();
         });
     };
 

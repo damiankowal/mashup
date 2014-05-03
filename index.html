@@ -9,7 +9,15 @@
     <div id="results"></div>
 
     <script id="marketTemplate" type="text/template">
-      <p><%= market.id %> : <%= market.name %>, <%= market.products %></p>
+      <div class="market-info">
+      <h2><%= market.name %></h2>
+      <p><a href="<%= market.googleLink %>">Map</a></p>
+      <dl>
+      <dt>Address:</dt><dd><%= market.name %></dd>
+      <dt>Schedule:</dt><dd><%= market.schedule %></dd>
+      <dt>Products:</dt><dd><%= market.products %></dd>
+      </dl>
+      </div>
     </script>
     <script src="js/lib/jquery.min.js"></script>
     <script src="js/lib/underscore-min.js"></script>
